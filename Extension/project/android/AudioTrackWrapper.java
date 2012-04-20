@@ -1,4 +1,8 @@
-package ;
+/**
+ * @author Oyra
+ */
+
+//package ;
 
 import java.io.IOException;
 
@@ -8,6 +12,7 @@ import android.media.AudioTrack;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 
 public class AudioTrackWrapper implements Runnable{
 
@@ -20,10 +25,8 @@ public class AudioTrackWrapper implements Runnable{
 	public static final int STOP = 102;
 	
 	private static Handler handler;
-	private Middle cb;
 	
-	public AudioTrackWrapper(Middle cb) {
-		this.cb = cb;
+	public AudioTrackWrapper() {
 		int minSize = getMinBufferSize();
 		track = new AudioTrack(AudioManager.STREAM_MUSIC, 44100,
 				AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT,
@@ -40,8 +43,7 @@ public class AudioTrackWrapper implements Runnable{
 	private AudioTrack.OnPlaybackPositionUpdateListener updateListener = new AudioTrack.OnPlaybackPositionUpdateListener()
 	{
 		public void onPeriodicNotification(AudioTrack player) {
-			
-			cb.callback();
+			Middle.callback();
 		}
 	
 		public void onMarkerReached(AudioTrack recorder) {
@@ -99,7 +101,7 @@ public class AudioTrackWrapper implements Runnable{
     			}
             }
         };
-        cb.setToHandler(handler);
+        Middle.setToHandler(handler);
 
         Looper.loop();
 		

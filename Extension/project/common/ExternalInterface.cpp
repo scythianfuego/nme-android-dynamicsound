@@ -29,7 +29,7 @@ extern "C" {
   #define JAVA_EXPORT JNIEXPORT
 #endif
 
-JAVA_EXPORT void JNICALL Java_Test_cb(JNIEnv *env, jclass myclass) {	AudioCallback(); }
+JAVA_EXPORT void JNICALL Java_Middle_cb(JNIEnv *env, jclass myclass) {	AudioCallback(); }
 
 }
 #endif

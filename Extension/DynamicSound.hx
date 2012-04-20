@@ -48,7 +48,7 @@ class DynamicSound
 	public function forceCallback() {
 		#if android
 		
-		var jni_call = JNI.createStaticMethod ("Test", "test_cb_call", "()Ljava/lang/String;");
+		var jni_call = JNI.createStaticMethod ("Middle", "test_callback_call", "()Ljava/lang/String;");
 		var output = jni_call();
 		trace(output);
 		

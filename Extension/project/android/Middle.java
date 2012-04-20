@@ -1,38 +1,55 @@
-package ;
+/**
+ * @author Oyra
+ */
+
+//package ;
 
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-
+import android.util.Log;
 
 public class Middle {
-
-	private static final String TAG = "Middle";
-	private Handler toHandler;
-	private Thread t;
 	
-	public Middle(){
-		AudioTrackWrapper a = new AudioTrackWrapper(this);
+	private static final String TAG = "Middle";
+	private static Handler toHandler;
+	private static Thread t;
+	
+	static{
+		System.load("/data/data/org.haxenme.extensiontest/libtest.so");
+	}
+	
+	public native void cb();		//callback to native - data required
+	
+	private static void initialise(){
+		AudioTrackWrapper a = new AudioTrackWrapper();
 		t = new Thread(a);
 		t.start();
 	}
-	public void play(){
+	
+	//API: starts playback
+	public static void play(){
+		if (t == null)
+			initialise();
+			
 		sendMsg(AudioTrackWrapper.PLAY, toHandler, null);
 	}
-	public void stop(){
+	
+	
+	public static void stop(){
 		sendMsg(AudioTrackWrapper.STOP, toHandler, null);
 	}
-	public void close(){
+	
+	
+	public static void close(){
 		if (t != null){
 			t.interrupt();
 		}
 	}
 	
 	
-	public void setToHandler(Handler toHandler) {
-		this.toHandler = toHandler;
-	}
-	public void send(float[]arr){
+	//API: recieves portion of audiodata
+	public static void send(float[]arr){
 		if (arr != null && arr.length > 0){
 			Bundle data = new Bundle();
 			data.putFloatArray("buffer", arr);
@@ -40,7 +57,13 @@ public class Middle {
 		}
 	}
 	
-	public void sendMsg(int whatMsg, Handler handler, Bundle bundle) {
+	
+	public static void setToHandler(Handler toHandler) {
+		Middle.toHandler = toHandler;
+	}
+
+	
+	public static void sendMsg(int whatMsg, Handler handler, Bundle bundle) {
 		try {
 			if (handler != null) {
 				Message msg = Message.obtain();
@@ -56,11 +79,32 @@ public class Middle {
 
 	}
 	
-	
-	public int getMinBufferSize(){
+	//returns buffer size for audiodata
+	public static int getMinBufferSize(){
 		return AudioTrackWrapper.getMinBufferSize();
 	}
-	public void callback(){
-		//you call will be here
+	
+	
+	//callback from wrapper - playback data required
+	public static void callback(){
+		try {		
+			Middle m = new Middle();
+			m.cb();		//call to native-haxecpp
+		} catch (Exception e) {
+		} catch (Error e){
+		}
+	}
+	
+	//test for callback, remove later
+	public static String test_callback_call() {
+		try {
+			Middle m = new Middle();
+			m.cb();
+		} catch (Error e){
+			return "Error " + e.toString();
+		} catch (Exception e){
+			return "Exception " + e.toString();
+		}
+		return "Ok";
 	}
 }
