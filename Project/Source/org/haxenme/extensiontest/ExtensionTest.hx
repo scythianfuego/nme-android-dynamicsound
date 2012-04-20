@@ -28,16 +28,27 @@ class ExtensionTest extends Sprite {
 		
 	}
 	
-	public static function listener(e : SampleDataEvent) {
-		
-	}
+	//generates test sine wave, frequency unknown atm)
+
 	
 	private function construct ():Void {
 		
 		var s = new DynamicSound();
+		var buf_size = s.getBufferSize();
+		trace("AudioTrack buffer size : " + buf_size);
+		
+		var listener = function(event : SampleDataEvent) {
+			for ( c in 0...buf_size ) {
+				event.data.writeFloat(Math.sin((c+event.position)/Math.PI/2)*0.25);
+				event.data.writeFloat(Math.sin((c+event.position)/Math.PI/2)*0.25);
+			}
+		}
+		
+		
 		s.addEventListener(SampleDataEvent.SAMPLE_DATA, listener);
 		s.play();
-		s.forceCallback();
+		//s.forceCallback();
+
 		
 		var message = "Math: 2 + 2 = " + Test.twoPlusTwo ();
 		message += "\nPlatforms: ";
@@ -77,17 +88,9 @@ class ExtensionTest extends Sprite {
 		Lib.current.stage.scaleMode = StageScaleMode.NO_SCALE;
 		
 		Label = new TextField ();
-		
 	}
 	
-	
-	
-	
 	// Entry point
-	
-	
-	
-	
 	public static function main () {
 		
 		trace("[" + Date.now() + "] Application launched"); 

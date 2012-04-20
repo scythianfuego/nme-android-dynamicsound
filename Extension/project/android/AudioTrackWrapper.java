@@ -52,8 +52,6 @@ public class AudioTrackWrapper implements Runnable{
 	};
 	
 	
-	
-	
 	public void stop() {
 		try {
 			track.stop();

@@ -7,6 +7,8 @@
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.media.AudioTrack;
+import android.media.AudioFormat;
 import android.util.Log;
 
 public class Middle {
@@ -81,7 +83,11 @@ public class Middle {
 	
 	//returns buffer size for audiodata
 	public static int getMinBufferSize(){
-		return AudioTrackWrapper.getMinBufferSize();
+			
+		//return AudioTrackWrapper.getMinBufferSize();
+		
+		return AudioTrack.getMinBufferSize(44100,
+				AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT);
 	}
 	
 	
