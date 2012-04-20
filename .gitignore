@@ -10,3 +10,8 @@
 *.lai
 *.la
 *.a
+
+#nme extension - sprecific
+Project/Export/*
+Extension/project/obj
+*.pdb
