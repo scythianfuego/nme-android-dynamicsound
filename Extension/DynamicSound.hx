@@ -24,6 +24,7 @@ class DynamicSound
 		
 	//jni API calls	
 	#if android								
+	//private static var jni_device_init:Dynamic;
 	private static var jni_device_play:Dynamic;
 	private static var jni_device_stop:Dynamic;
 	private static var jni_device_close:Dynamic;
@@ -125,9 +126,15 @@ class DynamicSound
 	public static function devicePlay():Void {
 			#if android
 			
+			//if (jni_device_init == null) {
+			//	jni_device_init = JNI.createStaticMethod ("Middle", "initialise", "()V");
+			//}
+			
 			if (jni_device_play == null) {
 				jni_device_play = JNI.createStaticMethod ("Middle", "play", "()V");
 			}
+			
+			//jni_device_init();
 			
 			jni_device_play();
 

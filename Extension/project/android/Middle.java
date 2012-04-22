@@ -23,7 +23,7 @@ public class Middle {
 	
 	public native void cb();		//callback to native - data required
 	
-	private static void initialise(){
+	public static void initialise(){
 		Log.i(TAG, "initialise");
 		AudioTrackWrapper a = new AudioTrackWrapper();
 		t = new Thread(a);
@@ -35,7 +35,12 @@ public class Middle {
 		Log.i(TAG, "play");
 		if (t == null)
 			initialise();
+		while (toHandler == null){
+			try {
+				Thread.sleep(200);
+			} catch (InterruptedException e) {}
 			
+		}
 		sendMsg(AudioTrackWrapper.PLAY, toHandler, null);
 	}
 	
