@@ -24,6 +24,7 @@ public class Middle {
 	public native void cb();		//callback to native - data required
 	
 	private static void initialise(){
+		Log.i(TAG, "initialise");
 		AudioTrackWrapper a = new AudioTrackWrapper();
 		t = new Thread(a);
 		t.start();
@@ -31,6 +32,7 @@ public class Middle {
 	
 	//API: starts playback
 	public static void play(){
+		Log.i(TAG, "play");
 		if (t == null)
 			initialise();
 			
@@ -39,11 +41,13 @@ public class Middle {
 	
 	
 	public static void stop(){
+		Log.i(TAG, "stop");
 		sendMsg(AudioTrackWrapper.STOP, toHandler, null);
 	}
 	
 	
 	public static void close(){
+		Log.i(TAG, "close");
 		if (t != null){
 			t.interrupt();
 		}
@@ -52,6 +56,7 @@ public class Middle {
 	
 	//API: recieves portion of audiodata
 	public static void send(float[]arr){
+		Log.i(TAG, "send");
 		if (arr != null && arr.length > 0){
 			Bundle data = new Bundle();
 			data.putFloatArray("buffer", arr);
@@ -61,13 +66,16 @@ public class Middle {
 	
 	
 	public static void setToHandler(Handler toHandler) {
+		Log.i(TAG, "setToHandler");
 		Middle.toHandler = toHandler;
 	}
 
 	
 	public static void sendMsg(int whatMsg, Handler handler, Bundle bundle) {
+		Log.i(TAG, "sendMsg");
 		try {
 			if (handler != null) {
+				Log.i(TAG, "sending message " + whatMsg);
 				Message msg = Message.obtain();
 				msg.what = whatMsg;
 				if (bundle != null)
@@ -85,7 +93,7 @@ public class Middle {
 	public static int getMinBufferSize(){
 			
 		//return AudioTrackWrapper.getMinBufferSize();
-		
+		Log.i(TAG, "getMinBufferSize");
 		return AudioTrack.getMinBufferSize(44100,
 				AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT);
 	}
@@ -93,6 +101,7 @@ public class Middle {
 	
 	//callback from wrapper - playback data required
 	public static void callback(){
+		Log.i(TAG, "callback");
 		try {		
 			Middle m = new Middle();
 			m.cb();		//call to native-haxecpp

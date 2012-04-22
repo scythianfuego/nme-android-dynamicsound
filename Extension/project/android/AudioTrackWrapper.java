@@ -27,6 +27,9 @@ public class AudioTrackWrapper implements Runnable{
 	private static Handler handler;
 	
 	public AudioTrackWrapper() {
+		
+		Log.i(TAG, "constructor");
+		
 		int minSize = getMinBufferSize();
 		track = new AudioTrack(AudioManager.STREAM_MUSIC, 44100,
 				AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT,
@@ -43,16 +46,18 @@ public class AudioTrackWrapper implements Runnable{
 	private AudioTrack.OnPlaybackPositionUpdateListener updateListener = new AudioTrack.OnPlaybackPositionUpdateListener()
 	{
 		public void onPeriodicNotification(AudioTrack player) {
+			Log.i("AudioTrackWrapperUL", "onPeriodicNotification");
 			Middle.callback();
 		}
 	
 		public void onMarkerReached(AudioTrack recorder) {
-			
+			Log.i("AudioTrackWrapperUL", "onMarkerReached");
 		}
 	};
 	
 	
 	public void stop() {
+		Log.i(TAG, "stop");
 		try {
 			track.stop();
 		} catch (IllegalStateException e) {
@@ -61,6 +66,7 @@ public class AudioTrackWrapper implements Runnable{
 	}
 
 	public void play(){
+		Log.i(TAG, "play");
 		try {
 			track.setPlaybackPositionUpdateListener(updateListener);
 			track.play();
@@ -70,11 +76,13 @@ public class AudioTrackWrapper implements Runnable{
 	}
 
 	public void feedData(float[] samples) {
+		Log.i(TAG, "feedData");
 		fillBuffer(samples);
 		track.write(buffer, 0, samples.length);
 	}
 
 	private void fillBuffer(float[] samples) {
+		Log.i(TAG, "fillBuffer");
 		if (buffer.length < samples.length)
 			buffer = new short[samples.length];
 
@@ -86,6 +94,7 @@ public class AudioTrackWrapper implements Runnable{
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
+		Log.i(TAG, "run");
 		Looper.prepare();
 		handler = new Handler() {
             public void handleMessage(Message msg) {
