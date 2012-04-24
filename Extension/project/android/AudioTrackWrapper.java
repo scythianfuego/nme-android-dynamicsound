@@ -1,3 +1,5 @@
+package com.oyra.test;
+
 /**
  * @author Oyra
  */
@@ -34,7 +36,7 @@ public class AudioTrackWrapper implements Runnable{
 		track = new AudioTrack(AudioManager.STREAM_MUSIC, 44100,
 				AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT,
 				minSize, AudioTrack.MODE_STREAM);
-		buffer = new short[minSize];
+		
 
 	}
 
@@ -44,14 +46,14 @@ public class AudioTrackWrapper implements Runnable{
 	}
 	
 	private AudioTrack.OnPlaybackPositionUpdateListener updateListener = new AudioTrack.OnPlaybackPositionUpdateListener()
-	{
+	{ 
 		public void onPeriodicNotification(AudioTrack player) {
-			Log.i("AudioTrackWrapperUL", "onPeriodicNotification");
+			Log.i(TAG, "onPeriodicNotification");
 			Middle.callback();
 		}
 	
 		public void onMarkerReached(AudioTrack recorder) {
-			Log.i("AudioTrackWrapperUL", "onMarkerReached");
+			Log.i(TAG, "onMarkerReached");
 		}
 	};
 	
@@ -65,9 +67,14 @@ public class AudioTrackWrapper implements Runnable{
 		}
 	}
 
+	public void fakePlay(){
+		Log.i(TAG, "fakePlay");
+			Middle.callback();
+	}
 	public void play(){
 		Log.i(TAG, "play");
 		try {
+			Middle.callback();
 			track.setPlaybackPositionUpdateListener(updateListener);
 			track.play();
 		} catch (IllegalStateException e) {
@@ -99,10 +106,19 @@ public class AudioTrackWrapper implements Runnable{
 		handler = new Handler() {
             public void handleMessage(Message msg) {
             	if (msg.what == FILL_BUFFER) {
-            		float[] samples = msg.getData().getFloatArray("buffer");
-            		feedData(samples);
+            		if (buffer == null || buffer.length == 0){
+            			buffer = new short[getMinBufferSize()];
+            			float[] samples = msg.getData().getFloatArray("buffer");
+                		feedData(samples);
+        				play();
+            		}
+            		//float[] samples = msg.getData().getFloatArray("buffer");
+            		//feedData(samples);
     			} else if (msg.what == PLAY){
-    				play();
+    				//float[] samples = msg.getData().getFloatArray("buffer");
+            		//feedData(samples);
+    				//play();
+    				fakePlay();
     			} else if (msg.what == STOP){
     				stop();
     			}

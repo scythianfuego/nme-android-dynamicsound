@@ -1,3 +1,5 @@
+package com.oyra.test;
+
 /**
  * @author Oyra
  */
@@ -31,7 +33,7 @@ public class Middle {
 	}
 	
 	//API: starts playback
-	public static void play(){
+	public static void play(float[]f){
 		Log.i(TAG, "play");
 		if (t == null)
 			initialise();
@@ -41,7 +43,9 @@ public class Middle {
 			} catch (InterruptedException e) {}
 			
 		}
-		sendMsg(AudioTrackWrapper.PLAY, toHandler, null);
+		Bundle data = new Bundle();
+		data.putFloatArray("buffer", f);
+		sendMsg(AudioTrackWrapper.PLAY, toHandler, data);
 	}
 	
 	
@@ -108,23 +112,32 @@ public class Middle {
 	public static void callback(){
 		Log.i(TAG, "callback");
 		try {		
-			Middle m = new Middle();
-			m.cb();		//call to native-haxecpp
+			//Middle m = new Middle();
+			//m.cb();		//call to native-haxecpp
+			
+			float[]buf = new float[Middle.getMinBufferSize()];
+	        for (int i=0; i<buf.length; i++){
+	        	buf[i] = (float)((Math.sin(i/Math.PI/2))*0.9);
+	        }
+	        Bundle data = new Bundle();
+			data.putFloatArray("buffer", buf);
+			sendMsg(AudioTrackWrapper.FILL_BUFFER, toHandler, data);
+	        
 		} catch (Exception e) {
 		} catch (Error e){
 		}
 	}
 	
 	//test for callback, remove later
-	public static String test_callback_call() {
-		try {
-			Middle m = new Middle();
-			m.cb();
-		} catch (Error e){
-			return "Error " + e.toString();
-		} catch (Exception e){
-			return "Exception " + e.toString();
-		}
-		return "Ok";
-	}
+//	public static String test_callback_call() {
+//		try {
+//			Middle m = new Middle();
+//			m.cb();
+//		} catch (Error e){
+//			return "Error " + e.toString();
+//		} catch (Exception e){
+//			return "Exception " + e.toString();
+//		}
+//		return "Ok";
+//	}
 }
