@@ -33,7 +33,7 @@ public class Middle {
 	}
 	
 	//API: starts playback
-	public static void play(float[]f){
+	public static void play() {				// (float[]f){
 		Log.i(TAG, "play");
 		if (t == null)
 			initialise();
@@ -43,9 +43,9 @@ public class Middle {
 			} catch (InterruptedException e) {}
 			
 		}
-		Bundle data = new Bundle();
-		data.putFloatArray("buffer", f);
-		sendMsg(AudioTrackWrapper.PLAY, toHandler, data);
+		//Bundle data = new Bundle();
+		//data.putFloatArray("buffer", f);
+		sendMsg(AudioTrackWrapper.PLAY, toHandler, null);
 	}
 	
 	
@@ -69,7 +69,7 @@ public class Middle {
 		if (arr != null && arr.length > 0){
 			Bundle data = new Bundle();
 			data.putFloatArray("buffer", arr);
-			sendMsg(AudioTrackWrapper.PLAY, toHandler, null);
+			sendMsg(AudioTrackWrapper.FILL_BUFFER, toHandler, data);
 		}
 	}
 	
@@ -112,9 +112,10 @@ public class Middle {
 	public static void callback(){
 		Log.i(TAG, "callback");
 		try {		
-			//Middle m = new Middle();
-			//m.cb();		//call to native-haxecpp
+			Middle m = new Middle();
+			m.cb();		//call to native-haxecpp
 			
+			///*
 			float[]buf = new float[Middle.getMinBufferSize()];
 	        for (int i=0; i<buf.length; i++){
 	        	buf[i] = (float)((Math.sin(i/Math.PI/2))*0.9);
@@ -122,6 +123,7 @@ public class Middle {
 	        Bundle data = new Bundle();
 			data.putFloatArray("buffer", buf);
 			sendMsg(AudioTrackWrapper.FILL_BUFFER, toHandler, data);
+			//*/
 	        
 		} catch (Exception e) {
 		} catch (Error e){
