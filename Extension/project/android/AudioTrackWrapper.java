@@ -75,6 +75,7 @@ public class AudioTrackWrapper implements Runnable{
 		Log.i(TAG, "play");
 		try {
 			Middle.callback();
+			track.setPositionNotificationPeriod(getMinBufferSize()/4);
 			track.setPlaybackPositionUpdateListener(updateListener);
 			track.play();
 		} catch (IllegalStateException e) {
