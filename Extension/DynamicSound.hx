@@ -5,6 +5,7 @@ import nme.utils.ByteArray;
 
 #if cpp
 import cpp.Lib;
+import cpp.vm.Thread;
 #elseif neko
 import neko.Lib;
 #end
@@ -31,22 +32,26 @@ class DynamicSound
 	private static var jni_buffer_size:Dynamic;
 	private static var jni_feed_data:Dynamic;
 	
+	
 	private static var jni_test_cb_call:Dynamic;
 	#end
 	
 	//native api calls 
 	private static var cpp_register_callback = Lib.load ("test", "test_register_callback", 1);
-
+	private static var cpp_register_trace = Lib.load ("test", "test_register_trace", 1);
+	
 	//private variables
 	private static var listener : SampleDataEvent -> Void;
 	private static var position : Float = 0;
 	private static var data : ByteArray;
 
+	private static var t : Thread;
 	
 	
 	public function new()
 	{
-		
+		cpp_register_trace(trace_callback);
+		cpp_register_callback(cpp_callback);
 	}
 	
 	
@@ -60,9 +65,47 @@ class DynamicSound
 	
 	
 	public function play() {
-		devicePlay();
-		cpp_register_callback(cpp_callback);
+		t = Thread.create(thread_func);
+		//t.sendMessage("stop")
+		//devicePlay();
 	}
+	
+	
+	public function thread_func() {
+		
+		//prepare part of data beforehand
+		var data = processSampleData();
+		//var jni_create = JNI.createStaticMethod ("AudioTrackAPI", "create", "()V");
+		
+		trace("reg1");
+		
+		var cpp_play = Lib.load ("test", "play", 0);
+		trace("loaded");
+		cpp_play();
+		
+		trace("reg2");
+		
+		/*
+		trace("create created");
+		var jni_play = JNI.createStaticMethod ("AudioTrackAPI", "play", "()V");
+		var jni_feed_data = JNI.createStaticMethod ("AudioTrackAPI", "feedData", "([F)V");
+		
+		jni_create();
+		jni_feed_data(data);
+		jni_play();
+		
+		while (true)
+		{
+			var msg = Thread.readMessage(false);		//non-blocking
+			//if (msg == "stop")
+			//	break;
+			
+			data = processSampleData();
+			jni_feed_data(data);
+		}
+		*/
+	}
+	
 	
 	public function stop() {
 		deviceStop();
@@ -71,6 +114,8 @@ class DynamicSound
 	
 	public function getBufferSize() : Int
 	{
+		return 9600;
+		
 		if (bufferSize != 0)
 			return bufferSize;
 		
@@ -87,18 +132,25 @@ class DynamicSound
 	//for debugging purpose only, remove later
 	public function forceCallback() {
 		#if android
-		
-		var jni_call = JNI.createStaticMethod ("Middle", "test_callback_call", "()Ljava/lang/String;");
-		var output = jni_call();
+		trace("forcing callback");
+		if (jni_test_cb_call == null)
+			jni_test_cb_call = JNI.createStaticMethod ("Middle", "test_callback_call", "()Ljava/lang/String;");
+			
+		var output = jni_test_cb_call();
 		trace(output);
-		
+		trace("done forcing callback");
 		#end
 	}
 	
 	
 	private static function cpp_callback() {
 		trace("callback");
-		processSampleData();
+		//processSampleData();
+	}
+	
+	private static function trace_callback(what : String)
+	{
+		trace(what);
 	}
 	
 	
@@ -113,13 +165,14 @@ class DynamicSound
 		while (data.bytesAvailable > 0)
 			float_data.push(data.readFloat());
 			
+		return float_data;
 		//return data to java
 		
-		if (jni_feed_data == null) {
-			jni_feed_data = JNI.createStaticMethod ("Middle", "send", "([F)V");
-		}
+		//if (jni_feed_data == null) {
+		//	jni_feed_data = JNI.createStaticMethod ("Middle", "send", "([F)V");
+		//}
 		
-		jni_feed_data(float_data);
+		//jni_feed_data(float_data);
 	}
 
 	

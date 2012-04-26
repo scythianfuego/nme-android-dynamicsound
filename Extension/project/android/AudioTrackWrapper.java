@@ -1,10 +1,6 @@
-package com.oyra.test;
-
 /**
  * @author Oyra
  */
-
-//package ;
 
 import java.io.IOException;
 
@@ -75,7 +71,7 @@ public class AudioTrackWrapper implements Runnable{
 		Log.i(TAG, "play");
 		try {
 			Middle.callback();
-			track.setPositionNotificationPeriod(getMinBufferSize()/4);
+			track.setPositionNotificationPeriod(160);
 			track.setPlaybackPositionUpdateListener(updateListener);
 			track.play();
 		} catch (IllegalStateException e) {
@@ -116,6 +112,7 @@ public class AudioTrackWrapper implements Runnable{
             		//float[] samples = msg.getData().getFloatArray("buffer");
             		//feedData(samples);
     			} else if (msg.what == PLAY){
+					Log.v(TAG, "PLAY received");
     				//float[] samples = msg.getData().getFloatArray("buffer");
             		//feedData(samples);
     				//play();

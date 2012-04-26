@@ -1,10 +1,6 @@
-package com.oyra.test;
-
 /**
  * @author Oyra
  */
-
-//package ;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,9 +20,17 @@ public class Middle {
 	}
 	
 	public native void cb();		//callback to native - data required
+	public native void trace(String s);		//trace to haxe
+	
+	public static void log(String s) {
+		Log.i(TAG, s);
+		Middle m = new Middle();
+		m.trace(s);
+	}
 	
 	public static void initialise(){
-		Log.i(TAG, "initialise");
+		log("initialise");
+		
 		AudioTrackWrapper a = new AudioTrackWrapper();
 		t = new Thread(a);
 		t.start();
@@ -34,7 +38,7 @@ public class Middle {
 	
 	//API: starts playback
 	public static void play() {				// (float[]f){
-		Log.i(TAG, "play");
+		log("play");
 		if (t == null)
 			initialise();
 		while (toHandler == null){
@@ -50,13 +54,13 @@ public class Middle {
 	
 	
 	public static void stop(){
-		Log.i(TAG, "stop");
+		log("stop");
 		sendMsg(AudioTrackWrapper.STOP, toHandler, null);
 	}
 	
 	
 	public static void close(){
-		Log.i(TAG, "close");
+		log("close");
 		if (t != null){
 			t.interrupt();
 		}
@@ -65,7 +69,7 @@ public class Middle {
 	
 	//API: recieves portion of audiodata
 	public static void send(float[]arr){
-		Log.i(TAG, "send");
+		log("send");
 		if (arr != null && arr.length > 0){
 			Bundle data = new Bundle();
 			data.putFloatArray("buffer", arr);
@@ -75,13 +79,13 @@ public class Middle {
 	
 	
 	public static void setToHandler(Handler toHandler) {
-		Log.i(TAG, "setToHandler");
+		Log.i(TAG, "setToHandler");			//called from external thread! hxcpp unfriendly
 		Middle.toHandler = toHandler;
 	}
 
 	
 	public static void sendMsg(int whatMsg, Handler handler, Bundle bundle) {
-		Log.i(TAG, "sendMsg");
+		log("sendMsg");
 		try {
 			if (handler != null) {
 				Log.i(TAG, "sending message " + whatMsg);
@@ -102,7 +106,7 @@ public class Middle {
 	public static int getMinBufferSize(){
 			
 		//return AudioTrackWrapper.getMinBufferSize();
-		Log.i(TAG, "getMinBufferSize");
+		log("getMinBufferSize");
 		return AudioTrack.getMinBufferSize(44100,
 				AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT);
 	}
@@ -131,15 +135,16 @@ public class Middle {
 	}
 	
 	//test for callback, remove later
-//	public static String test_callback_call() {
-//		try {
-//			Middle m = new Middle();
-//			m.cb();
-//		} catch (Error e){
-//			return "Error " + e.toString();
-//		} catch (Exception e){
-//			return "Exception " + e.toString();
-//		}
-//		return "Ok";
-//	}
+	public static String test_callback_call()  {
+		log("test_callback");
+		try {
+			Middle m = new Middle();
+			m.trace("low ok");
+		} catch (Error e){
+			return "Error " + e.toString();
+		} catch (Exception e){
+			return "Exception " + e.toString();
+		}
+		return "Ok";
+	}
 }

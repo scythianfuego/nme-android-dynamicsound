@@ -8,4 +8,3 @@ haxelib run hxcpp Build.xml -Dandroid
 cd ..\..\
 cd Project
 haxelib run nme test soundupdate.nmml android
-cd ..
