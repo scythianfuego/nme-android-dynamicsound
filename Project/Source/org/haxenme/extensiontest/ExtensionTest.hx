@@ -34,8 +34,8 @@ class ExtensionTest extends Sprite {
 	private function construct ():Void {
 		
 		var s = new DynamicSound();
-		var buf_size = s.getBufferSize();
-		trace("AudioTrack buffer size : " + buf_size);
+		var buf_size = 8192;	//samples, function s.getBufferSize() returns minimal possible buffer
+		s.setBufferSize(buf_size);
 		
 		var listener = function(event : SampleDataEvent) {
 			for ( c in 0...buf_size ) {
@@ -47,29 +47,8 @@ class ExtensionTest extends Sprite {
 		
 		s.addEventListener(SampleDataEvent.SAMPLE_DATA, listener);
 		s.play();
-		//s.forceCallback();
 
-		
-		var message = "Math: 2 + 2 = " + Test.twoPlusTwo ();
-		message += "\nPlatforms: ";
-		
-		var platforms = Test.getPlatforms ();
-		
-		for (i in 0...platforms.length) {
-			
-			if (i == platforms.length - 1) {
-				
-				message += " and ";
-				
-			} else if (i > 0) {
-				
-				message += ", ";
-				
-			}
-			
-			message += platforms[i];
-			
-		}
+		var message = "You should hear a sine sound wave";
 		
 		Label.defaultTextFormat = new TextFormat ("_sans", 24, 0x222222);
 		Label.width = 400;

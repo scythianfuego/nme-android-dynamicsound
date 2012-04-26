@@ -6,186 +6,132 @@
 #define NEKO_COMPATIBLE
 #endif
 
+#ifdef ANDROID
 
 #include <hx/CFFI.h>
-#include "Utils.h"
 #include <stdio.h>
-
-AutoGCRoot *gCallback = 0;
-AutoGCRoot *gTraceCallback = 0;
-static value test_register_callback(value f);
-static value AudioCallback();
-static value TraceCallback(const char* s);
-static void test_call_printf (value message);
-
-using namespace test;
-
-
 #include <jni.h>
 #include <android/log.h>
 
-
-#ifdef ANDROID
 extern "C" {
 
-#ifdef __GNUC__
-  #define JAVA_EXPORT __attribute__ ((visibility("default"))) JNIEXPORT
-#else
-  #define JAVA_EXPORT JNIEXPORT
-#endif
+	#ifdef __GNUC__
+	  #define JAVA_EXPORT __attribute__ ((visibility("default"))) JNIEXPORT
+	#else
+	  #define JAVA_EXPORT JNIEXPORT
+	#endif
 
-JAVA_EXPORT void JNICALL Java_Middle_cb(JNIEnv *env, jclass myclass) {	
-	__android_log_write(ANDROID_LOG_INFO, "Native", "java_middle_cb");
-	AudioCallback(); 
+	JavaVM *gJVM=0;
+
+	static jclass AudioTrackProxy = NULL;
+
+	jint JNI_OnLoad(JavaVM *vm, void *reserved)
+	{
+		gJVM = vm;
+		JNIEnv* env = NULL;
+		jint result = -1;
+	
+		if (vm->GetEnv((void**) &env, JNI_VERSION_1_4) != JNI_OK) {
+			__android_log_write(ANDROID_LOG_ERROR, "NME DynamicSound", "Native code: failed to initialize JNI");
+			return result;
+		}
+	
+		jclass localRefCls = env->FindClass("AudioTrackProxy");
+		if (localRefCls == NULL) {
+			__android_log_write(ANDROID_LOG_ERROR, "NME DynamicSound", "Native code: failed to find AudioTrackProxy class");
+			return result;	 
+		}
+
+		AudioTrackProxy = (jclass)env->NewGlobalRef(localRefCls);
+		env->DeleteLocalRef(localRefCls);
+		if (AudioTrackProxy == NULL) {
+			__android_log_write(ANDROID_LOG_ERROR, "NME DynamicSound", "Native code: failed to create a global reference");
+			return result;	 
+		}
+	
+		return JNI_VERSION_1_4;
+	}
+
 }
 
-JAVA_EXPORT void JNICALL Java_Middle_trace(JNIEnv *env, jclass myclass, jstring javaString) {	
 
-	__android_log_write(ANDROID_LOG_INFO, "Native", "java_middle_trace");
 
-	const char *nativeString = env->GetStringUTFChars(javaString, 0);
-	TraceCallback(nativeString);
-    env->ReleaseStringUTFChars(javaString, nativeString);
-}
-
-JavaVM *gJVM=0;
-
-static jclass AudioTrackProxy = NULL;
-
-jint JNI_OnLoad(JavaVM *vm, void *reserved)
-{
-	gJVM = vm;
-	
-	JNIEnv* env = NULL;
-    jint result = -1;
-	
-    if (vm->GetEnv((void**) &env, JNI_VERSION_1_4) != JNI_OK) {
-        __android_log_write(ANDROID_LOG_INFO, "Native", "jni not loaded");
-        return result;
-    }
-	
-	jclass localRefCls = env->FindClass("AudioTrackProxy");
-	if (localRefCls == NULL) return NULL; // exception thrown
-
-	AudioTrackProxy = (jclass)env->NewGlobalRef(localRefCls);
-	env->DeleteLocalRef(localRefCls);
-	if (AudioTrackProxy == NULL) return NULL; // exception thrown
-	
-	return JNI_VERSION_1_4;
-}
-
-}
-#endif
-
-static value play()
-{
-
+static value jni_call(int what, value param) {
 	JNIEnv *env = 0;
 	gJVM->AttachCurrentThread(&env, NULL);
-	
-__android_log_write(ANDROID_LOG_INFO, "Native", "thread attached");
+	jint result;
+	jmethodID mid;
 
-	jmethodID mid = env->GetStaticMethodID(AudioTrackProxy, "play", "()V");
-	
-	__android_log_print(ANDROID_LOG_INFO, "Native", "env getmethod %d %d", AudioTrackProxy, mid);
-	
-	if(mid>0)
+	switch (what)
 	{
-		env->CallStaticVoidMethod(AudioTrackProxy,mid);
+		case 1:	//create
+			mid = env->GetStaticMethodID(AudioTrackProxy, "create", "(I)V");
+			env->CallStaticVoidMethod(AudioTrackProxy, mid, val_int(param));
+			break;
+
+		case 2:	//play
+			mid = env->GetStaticMethodID(AudioTrackProxy, "play", "()V");
+			env->CallStaticVoidMethod(AudioTrackProxy, mid);
+			break;
+
+		case 3:	//feed
+			{
+				mid = env->GetStaticMethodID(AudioTrackProxy, "feed", "([S)V");
+				jdouble* from_arr = val_array_double(param);
+				int size = val_array_size(param);
+				
+				jshort* to_arr = new jshort[size];		//copy double to short
+				for(int i=0; i<size; i++) {
+					to_arr[i] = (short)(0x7fff * from_arr[i]);
+				}
+				
+				jshortArray j_arr = (jshortArray)(env->NewShortArray(size));
+				env->SetShortArrayRegion(j_arr, 0, size, to_arr);
+				env->CallStaticVoidMethod(AudioTrackProxy, mid, j_arr);
+				env->DeleteLocalRef(j_arr);
+
+				delete[] to_arr;
+			}
+			break;
+
+		case 4:	//stop
+			mid = env->GetStaticMethodID(AudioTrackProxy, "stop", "()V");
+			env->CallStaticVoidMethod(AudioTrackProxy, mid);
+			break;
+
+		case 5: //buffer
+			mid = env->GetStaticMethodID(AudioTrackProxy, "bufferSize", "()I");
+			result = env->CallStaticIntMethod(AudioTrackProxy, mid);
+			return alloc_int(result);
+			break;
+			
+		case 6: //setbuffer
+			mid = env->GetStaticMethodID(AudioTrackProxy, "setBufferSize", "()I");
+			result = env->CallStaticIntMethod(AudioTrackProxy, mid);
+			return alloc_int(result);
+			break;
 	}
-	
-	return alloc_null();
-}
-DEFINE_PRIM (play, 0);
-
-static value test_register_callback (value f) {
-	
-	__android_log_write(ANDROID_LOG_INFO, "Native", "register_callback");
-	 
-	
-	val_check_function(f,0); 	// checks that f has 0 argument
-
-	 if (!gCallback)
-		gCallback = new AutoGCRoot(f);
 
 	return alloc_null();
 }
-DEFINE_PRIM (test_register_callback, 1);
+
+static value create(value b)		{ jni_call(1, b); }				DEFINE_PRIM (create, 1);
+static value play()					{ jni_call(2, alloc_null()); }	DEFINE_PRIM (play, 0);
+static value feed(value f)			{ jni_call(3, f); }				DEFINE_PRIM (feed, 1);
+static value stop()					{ jni_call(4, alloc_null()); }	DEFINE_PRIM (stop, 0);
+static value bufferSize()			{ jni_call(5, alloc_null()); }	DEFINE_PRIM (bufferSize, 0);
 
 
-static value test_register_trace(value f) {
-	
-	__android_log_write(ANDROID_LOG_INFO, "Native", "register_trace");
-	//val_check_function(f,1); 	// checks that f has 1 argument
-
-	if (!gTraceCallback)
-		gTraceCallback = new AutoGCRoot(f);
-
-	return alloc_null();
-}
-DEFINE_PRIM (test_register_trace, 1);
-
-
-static value TraceCallback(const char* s)
-{
-	__android_log_write(ANDROID_LOG_INFO, "Native", "TraceCallback");
-	if (gTraceCallback)
-		val_call1(gTraceCallback->get(), alloc_string(s));
-		
-	return alloc_null();	
-}
-
-
-static value AudioCallback() {
-	__android_log_write(ANDROID_LOG_INFO, "Native", "AudioCallback");
-	gc_enter_blocking();
-	
-	if(gCallback)
-		val_call0(gCallback->get());
-		
-	gc_exit_blocking();
-	
-	return alloc_null();
-}
-
-
-
-
-
-
-//unused stuff from example
-
-static void test_call_printf (value message) {
-	
-	printf (val_string (message));
-	
-}
-DEFINE_PRIM (test_call_printf, 1);
-
-
-static value test_get_name () {
-	
-	return alloc_string (GetName ());
-	
-}
-DEFINE_PRIM (test_get_name, 0);
-
-
-static value test_two_plus_two () {
-	
-	return alloc_int (TwoPlusTwo ());
-	
-}
-DEFINE_PRIM (test_two_plus_two, 0);
-
-
+//important
 
 extern "C" void test_main () {
-	
 	// Here you could do some initialization, if needed
-	
 }
 DEFINE_ENTRY_POINT (test_main);
 
-
 extern "C" int test_register_prims () { return 0; }
+
+#endif
+
+
+

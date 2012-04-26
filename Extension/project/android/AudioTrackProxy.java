@@ -23,40 +23,27 @@ public class AudioTrackProxy {
 	
 	public static int minSize = 0;
 	
-	public static void create() {
+	public static void create(int req_buffer_size) {
 		
 		Log.i(TAG, "constructor");
 		
+		minSize = req_buffer_size;
+		
 		track = new AudioTrack(AudioManager.STREAM_MUSIC, 44100,
 				AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT,
-				getMinBufferSize(), AudioTrack.MODE_STREAM);
+				bufferSize(), AudioTrack.MODE_STREAM);
 				
-		buffer = new short[getMinBufferSize()];
+		buffer = new short[bufferSize()];
 
 	}
 
-	public static int getMinBufferSize(){
+	public static int bufferSize(){
 		if (minSize == 0)
 			minSize = AudioTrack.getMinBufferSize(44100,
 				AudioFormat.CHANNEL_OUT_STEREO, AudioFormat.ENCODING_PCM_16BIT);
 				
 		return minSize;
 	}
-	
-	//may be not needed
-	/*
-	private AudioTrack.OnPlaybackPositionUpdateListener updateListener = new AudioTrack.OnPlaybackPositionUpdateListener()
-	{ 
-		public void onPeriodicNotification(AudioTrack player) {
-			Log.i(TAG, "onPeriodicNotification");
-			//call to this send data?
-		}
-	
-		public void onMarkerReached(AudioTrack recorder) {
-			Log.i(TAG, "onMarkerReached");
-		}
-	};
-	*/
 	
 	public static void stop() {
 		Log.i(TAG, "stop");
@@ -79,12 +66,13 @@ public class AudioTrackProxy {
 		}
 	}
 
-	public static void feedData(float[] samples) {
-		Log.i(TAG, "feedData");
-		fillBuffer(samples);
-		track.write(buffer, 0, samples.length);
+	public static void feed(short[] samples) {
+		Log.i(TAG, "feed" + samples.length);
+		track.write(samples, 0, samples.length);
 	}
 
+	
+	/*
 	private static void fillBuffer(float[] samples) {
 		Log.i(TAG, "fillBuffer");
 		if (buffer.length < samples.length)
@@ -93,5 +81,6 @@ public class AudioTrackProxy {
 		for (int i = 0; i < samples.length; i++)
 			buffer[i] = (short) (samples[i] * Short.MAX_VALUE);
 	}
+	*/
 
 }
