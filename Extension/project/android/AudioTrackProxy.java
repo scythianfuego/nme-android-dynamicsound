@@ -25,7 +25,8 @@ public class AudioTrackProxy {
 	
 	public static void create(int req_buffer_size) {
 		
-		Log.i(TAG, "constructor");
+		//Thread.currentThread().setPriority(7);
+		Log.i("AudioTrackApi", "Priority set to " + Thread.currentThread().getPriority());
 		
 		minSize = req_buffer_size;
 		
@@ -46,7 +47,6 @@ public class AudioTrackProxy {
 	}
 	
 	public static void stop() {
-		Log.i(TAG, "stop");
 		try {
 			track.stop();
 		} catch (IllegalStateException e) {
@@ -55,11 +55,7 @@ public class AudioTrackProxy {
 	}
 	
 	public static void play(){
-		Log.i(TAG, "play");
 		try {
-					//track.setPositionNotificationPeriod(160);
-					//track.setPlaybackPositionUpdateListener(updateListener);
-			//do not forget to write some data before
 			track.play();
 		} catch (IllegalStateException e) {
 			Log.e(TAG, "error", e);
@@ -67,20 +63,8 @@ public class AudioTrackProxy {
 	}
 
 	public static void feed(short[] samples) {
-		Log.i(TAG, "feed" + samples.length);
 		track.write(samples, 0, samples.length);
 	}
 
-	
-	/*
-	private static void fillBuffer(float[] samples) {
-		Log.i(TAG, "fillBuffer");
-		if (buffer.length < samples.length)
-			buffer = new short[samples.length];
-
-		for (int i = 0; i < samples.length; i++)
-			buffer[i] = (short) (samples[i] * Short.MAX_VALUE);
-	}
-	*/
 
 }

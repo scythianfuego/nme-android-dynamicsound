@@ -25,6 +25,7 @@ extern "C" {
 
 	static jclass AudioTrackProxy = NULL;
 
+
 	jint JNI_OnLoad(JavaVM *vm, void *reserved)
 	{
 		gJVM = vm;
@@ -55,6 +56,8 @@ extern "C" {
 }
 
 
+jshort* to_arr;
+
 
 static value jni_call(int what, value param) {
 	JNIEnv *env = 0;
@@ -65,8 +68,12 @@ static value jni_call(int what, value param) {
 	switch (what)
 	{
 		case 1:	//create
-			mid = env->GetStaticMethodID(AudioTrackProxy, "create", "(I)V");
-			env->CallStaticVoidMethod(AudioTrackProxy, mid, val_int(param));
+			{
+				mid = env->GetStaticMethodID(AudioTrackProxy, "create", "(I)V");
+				env->CallStaticVoidMethod(AudioTrackProxy, mid, val_int(param));
+				int size = val_int(param);
+				to_arr = new jshort[size];
+			}
 			break;
 
 		case 2:	//play
@@ -80,23 +87,23 @@ static value jni_call(int what, value param) {
 				jdouble* from_arr = val_array_double(param);
 				int size = val_array_size(param);
 				
-				jshort* to_arr = new jshort[size];		//copy double to short
-				for(int i=0; i<size; i++) {
+				//copy double to short
+				for(int i=0; i<size; i++)
 					to_arr[i] = (short)(0x7fff * from_arr[i]);
-				}
 				
 				jshortArray j_arr = (jshortArray)(env->NewShortArray(size));
 				env->SetShortArrayRegion(j_arr, 0, size, to_arr);
 				env->CallStaticVoidMethod(AudioTrackProxy, mid, j_arr);
 				env->DeleteLocalRef(j_arr);
-
-				delete[] to_arr;
 			}
 			break;
 
 		case 4:	//stop
-			mid = env->GetStaticMethodID(AudioTrackProxy, "stop", "()V");
-			env->CallStaticVoidMethod(AudioTrackProxy, mid);
+			{
+				mid = env->GetStaticMethodID(AudioTrackProxy, "stop", "()V");
+				env->CallStaticVoidMethod(AudioTrackProxy, mid);
+				delete[] to_arr;
+			}
 			break;
 
 		case 5: //buffer
@@ -105,11 +112,6 @@ static value jni_call(int what, value param) {
 			return alloc_int(result);
 			break;
 			
-		case 6: //setbuffer
-			mid = env->GetStaticMethodID(AudioTrackProxy, "setBufferSize", "()I");
-			result = env->CallStaticIntMethod(AudioTrackProxy, mid);
-			return alloc_int(result);
-			break;
 	}
 
 	return alloc_null();
