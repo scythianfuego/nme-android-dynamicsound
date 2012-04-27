@@ -42,7 +42,7 @@ or
     var buffer_size = 2400;               //should be greater than the minimal one
     s.setBufferSize(buffer_size); 
 
-Buffer size is set in samples, both channel. Real buffer size on the android device 
+Buffer size is set in samples, for one out of two channels. Real buffer size on the android device 
 will be *buffer_size * 2 (16bit) * 2 (stereo)* bytes.
 
 Add a listener of DynamicSoundDataEvent (it is NOT a subclass of nme.Event) 
