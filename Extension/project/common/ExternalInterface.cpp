@@ -112,6 +112,11 @@ static value jni_call(int what, value param) {
 			return alloc_int(result);
 			break;
 			
+		case 6: //priority
+			mid = env->GetStaticMethodID(AudioTrackProxy, "setAudioPriority", "()V");
+			result = env->CallStaticIntMethod(AudioTrackProxy, mid);
+			break;
+			
 	}
 
 	return alloc_null();
@@ -122,6 +127,7 @@ static value play()					{ jni_call(2, alloc_null()); }	DEFINE_PRIM (play, 0);
 static value feed(value f)			{ jni_call(3, f); }				DEFINE_PRIM (feed, 1);
 static value stop()					{ jni_call(4, alloc_null()); }	DEFINE_PRIM (stop, 0);
 static value bufferSize()			{ jni_call(5, alloc_null()); }	DEFINE_PRIM (bufferSize, 0);
+static value audioPriority()		{ jni_call(6, alloc_null()); }	DEFINE_PRIM (audioPriority, 0);
 
 
 //important

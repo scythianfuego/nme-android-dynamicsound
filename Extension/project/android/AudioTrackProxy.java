@@ -7,6 +7,7 @@ import java.io.IOException;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.os.Process;
 import android.util.Log;
 
 public class AudioTrackProxy {
@@ -23,10 +24,14 @@ public class AudioTrackProxy {
 	
 	public static int minSize = 0;
 	
+	public static void setAudioPriority() {
+		Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
+		Log.i("AudioTrackApi", "Priority set to " + Process.getThreadPriority(Process.myTid()));
+	}
+	
 	public static void create(int req_buffer_size) {
 		
-		//Thread.currentThread().setPriority(7);
-		Log.i("AudioTrackApi", "Priority set to " + Thread.currentThread().getPriority());
+
 		
 		minSize = req_buffer_size;
 		

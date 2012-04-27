@@ -27,6 +27,13 @@ private class LockedBuffer
 	private var data: Array<Float>;
 	private var data_for_write: Array<Float>;
 	private var counter: Int;
+	private var l : Lock;
+	
+	
+	public function waitForData() {
+		l.wait();
+		l =  null;
+	}
 	
 	public function takeData() {
 		m.acquire();
@@ -44,12 +51,14 @@ private class LockedBuffer
 	public function putData(newdata : Array<Float>) {
 		data_for_write = newdata;
 		m.release();
+		if (l != null) l.release();
 	}
 	
 
 	public function new()
 	{
 		m = new Mutex();
+		l = new Lock();
 		data = null; 
 	}
 
@@ -76,6 +85,7 @@ class DynamicSound
 	private static var cpp_feed 		= Lib.load ("test", "feed", 1);
 	private static var cpp_stop 		= Lib.load ("test", "stop", 0);
 	private static var cpp_bufferSize 	= Lib.load ("test", "bufferSize", 0);
+	private static var cpp_audioPriority= Lib.load ("test", "audioPriority", 0);
 	
 	public function new()	{}
 	
@@ -107,6 +117,7 @@ class DynamicSound
 	public function generator_func()
 	{
 		var locker : LockedBuffer = Thread.readMessage(true);
+		cpp_audioPriority();
 		
 		while (true) {
 			var unlocked = Thread.readMessage(true);
@@ -121,10 +132,9 @@ class DynamicSound
 		var locker : LockedBuffer = Thread.readMessage(true);
 		var generator : Thread = Thread.readMessage(true);
 
-		var data = null;
-		while (data == null)		
-			data = locker.takeData();
-			
+		locker.waitForData();	
+
+		var data = locker.takeData();
 		generator.sendMessage(1);
 		
 		trace("Started thread. Buffer length is " + data.length + " samples");
