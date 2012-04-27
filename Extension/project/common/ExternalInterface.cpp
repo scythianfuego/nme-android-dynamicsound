@@ -117,6 +117,9 @@ static value jni_call(int what, value param) {
 			result = env->CallStaticIntMethod(AudioTrackProxy, mid);
 			break;
 			
+		case 7: //detach
+			gJVM->DetachCurrentThread();
+			break;
 	}
 
 	return alloc_null();
@@ -128,6 +131,7 @@ static value feed(value f)			{ jni_call(3, f); }				DEFINE_PRIM (feed, 1);
 static value stop()					{ jni_call(4, alloc_null()); }	DEFINE_PRIM (stop, 0);
 static value bufferSize()			{ jni_call(5, alloc_null()); }	DEFINE_PRIM (bufferSize, 0);
 static value audioPriority()		{ jni_call(6, alloc_null()); }	DEFINE_PRIM (audioPriority, 0);
+static value detach()				{ jni_call(7, alloc_null()); }	DEFINE_PRIM (detach, 0);
 
 
 //important

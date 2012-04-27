@@ -30,9 +30,7 @@ public class AudioTrackProxy {
 	}
 	
 	public static void create(int req_buffer_size) {
-		
 
-		
 		minSize = req_buffer_size;
 		
 		track = new AudioTrack(AudioManager.STREAM_MUSIC, 44100,

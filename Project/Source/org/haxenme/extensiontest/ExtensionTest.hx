@@ -1,10 +1,10 @@
 package org.haxenme.extensiontest;
 
-
 import nme.display.Sprite;
 import nme.display.StageAlign;
 import nme.display.StageScaleMode;
-import DynamicSoundDataEvent;
+import nme.media.DynamicSound;
+import nme.media.DynamicSoundDataEvent;
 import nme.events.MouseEvent;
 import nme.Lib;
 import nme.text.TextField;
@@ -12,7 +12,9 @@ import nme.text.TextFormat;
 
 
 /**
+ * @author Scythian
  * @author Joshua Granick
+ * 
  */
 class ExtensionTest extends Sprite {
 	
@@ -47,17 +49,22 @@ class ExtensionTest extends Sprite {
 		
 		s.listen(listener);
 
-		Lib.current.stage.addEventListener(MouseEvent.CLICK, function(e) {
-			if (playing)
-				s.stop();
-			else
+		Lib.current.stage.addEventListener(MouseEvent.MOUSE_DOWN, function(e) {
+			if (!playing)
 				s.play();
 
-			playing = !playing;
+			playing = true;
+		});
+		
+		Lib.current.stage.addEventListener(MouseEvent.MOUSE_UP, function(e) {
+			if (playing)
+				s.stop();
+
+			playing = false;
 		});
 		
 
-		var message = "You should hear a sine sound wave";
+		var message = "Tap on screen \nand you will hear a sine sound wave";
 		
 		Label.defaultTextFormat = new TextFormat ("_sans", 24, 0x222222);
 		Label.width = 400;
