@@ -36,7 +36,9 @@ Request a minimal buffer size (device dependent) or set your own.
 The buffer must be set before starting playback.
 
     var buffer_size = s.getBufferSize();  // minimal possible buffer
+    
 or
+
     var buffer_size = 2400;               //should be greater than the minimal one
     s.setBufferSize(buffer_size); 
 
@@ -64,7 +66,9 @@ Control playback:
 **Running the test application**
 
     build.bat on Windows
+    
 or
+
     cd Project
     haxelib run nme test soundupdate.nmml android
 
