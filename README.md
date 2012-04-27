@@ -79,4 +79,4 @@ or
 
 **License:**
 
-    This  extension and example provided under the main haxe NME project license.
+This  extension and example provided under the main haxe NME project license.
