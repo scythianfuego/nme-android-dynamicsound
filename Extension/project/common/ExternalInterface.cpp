@@ -22,9 +22,7 @@ extern "C" {
 	#endif
 
 	JavaVM *gJVM=0;
-
 	static jclass AudioTrackProxy = NULL;
-
 
 	jint JNI_OnLoad(JavaVM *vm, void *reserved)
 	{
@@ -37,7 +35,7 @@ extern "C" {
 			return result;
 		}
 	
-		jclass localRefCls = env->FindClass("AudioTrackProxy");
+		jclass localRefCls = env->FindClass("com/github/scythianfuego/AudioTrackProxy");
 		if (localRefCls == NULL) {
 			__android_log_write(ANDROID_LOG_ERROR, "NME DynamicSound", "Native code: failed to find AudioTrackProxy class");
 			return result;	 
@@ -56,8 +54,7 @@ extern "C" {
 }
 
 
-jshort* to_arr;
-
+jshort* to_arr;			//buffer for data chunk
 
 static value jni_call(int what, value param) {
 	JNIEnv *env = 0;
@@ -100,24 +97,46 @@ static value jni_call(int what, value param) {
 
 		case 4:	//stop
 			{
+				//flush -> stop -> release
+
+				mid = env->GetStaticMethodID(AudioTrackProxy, "flush", "()V");
+				env->CallStaticVoidMethod(AudioTrackProxy, mid);
+				
 				mid = env->GetStaticMethodID(AudioTrackProxy, "stop", "()V");
 				env->CallStaticVoidMethod(AudioTrackProxy, mid);
+				
+				mid = env->GetStaticMethodID(AudioTrackProxy, "release", "()V");
+				env->CallStaticVoidMethod(AudioTrackProxy, mid);
+				
 				delete[] to_arr;
 			}
 			break;
 
-		case 5: //buffer
+		case 5: //pause
+			{
+				//pause -> flush
+				
+				mid = env->GetStaticMethodID(AudioTrackProxy, "pause", "()V");
+				env->CallStaticVoidMethod(AudioTrackProxy, mid);
+				
+				mid = env->GetStaticMethodID(AudioTrackProxy, "flush", "()V");
+				env->CallStaticVoidMethod(AudioTrackProxy, mid);
+				
+			}
+			break;
+			
+		case 6: //buffer
 			mid = env->GetStaticMethodID(AudioTrackProxy, "bufferSize", "()I");
 			result = env->CallStaticIntMethod(AudioTrackProxy, mid);
 			return alloc_int(result);
 			break;
 			
-		case 6: //priority
+		case 7: //priority
 			mid = env->GetStaticMethodID(AudioTrackProxy, "setAudioPriority", "()V");
 			result = env->CallStaticIntMethod(AudioTrackProxy, mid);
 			break;
 			
-		case 7: //detach
+		case 8: //detach
 			gJVM->DetachCurrentThread();
 			break;
 	}
@@ -129,15 +148,16 @@ static value create(value b)		{ jni_call(1, b); }				DEFINE_PRIM (create, 1);
 static value play()					{ jni_call(2, alloc_null()); }	DEFINE_PRIM (play, 0);
 static value feed(value f)			{ jni_call(3, f); }				DEFINE_PRIM (feed, 1);
 static value stop()					{ jni_call(4, alloc_null()); }	DEFINE_PRIM (stop, 0);
-static value bufferSize()			{ jni_call(5, alloc_null()); }	DEFINE_PRIM (bufferSize, 0);
-static value audioPriority()		{ jni_call(6, alloc_null()); }	DEFINE_PRIM (audioPriority, 0);
-static value detach()				{ jni_call(7, alloc_null()); }	DEFINE_PRIM (detach, 0);
+static value pause()				{ jni_call(5, alloc_null()); }	DEFINE_PRIM (pause, 0);
+static value bufferSize()			{ jni_call(6, alloc_null()); }	DEFINE_PRIM (bufferSize, 0);
+static value audioPriority()		{ jni_call(7, alloc_null()); }	DEFINE_PRIM (audioPriority, 0);
+static value detach()				{ jni_call(8, alloc_null()); }	DEFINE_PRIM (detach, 0);
 
 
 //important
 
 extern "C" void test_main () {
-	// Here you could do some initialization, if needed
+
 }
 DEFINE_ENTRY_POINT (test_main);
 

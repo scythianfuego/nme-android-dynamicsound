@@ -2,6 +2,8 @@
  * @author Oyra
  */
 
+package com.github.scythianfuego; 
+ 
 import java.io.IOException;
 
 import android.media.AudioFormat;
@@ -12,7 +14,7 @@ import android.util.Log;
 
 public class AudioTrackProxy {
 
-	private static final String TAG = "AudioTrackAPI";
+	private static final String TAG = "NME DynamicSound";
 	private static AudioTrack track = null;
 	private static short[] buffer = null;
 
@@ -20,13 +22,11 @@ public class AudioTrackProxy {
 	public static final int PLAY = 101;
 	public static final int STOP = 102;
 	
-	//private static Handler handler;
-	
 	public static int minSize = 0;
 	
 	public static void setAudioPriority() {
 		Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
-		Log.i("AudioTrackApi", "Priority set to " + Process.getThreadPriority(Process.myTid()));
+		Log.i(TAG, "Priority set to " + Process.getThreadPriority(Process.myTid()));
 	}
 	
 	public static void create(int req_buffer_size) {
@@ -52,6 +52,30 @@ public class AudioTrackProxy {
 	public static void stop() {
 		try {
 			track.stop();
+		} catch (IllegalStateException e) {
+			Log.e(TAG, "error", e);
+		}
+	}
+	
+	public static void flush() {
+		try {
+			track.flush();
+		} catch (IllegalStateException e) {
+			Log.e(TAG, "error", e);
+		}
+	}
+	
+	public static void release() {
+		try {
+			track.release();
+		} catch (IllegalStateException e) {
+			Log.e(TAG, "error", e);
+		}
+	}
+	
+	public static void pause() {
+		try {
+			track.pause();
 		} catch (IllegalStateException e) {
 			Log.e(TAG, "error", e);
 		}

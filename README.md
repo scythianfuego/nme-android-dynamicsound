@@ -3,19 +3,21 @@ nme-android-dynamicsound
 
 **Implementation of generative audio for haxe+NME3+android**
 
+Current version: 0.1.0
+
 This native extension for haxe NME implements generative audio 
 for android target by wrapping AudioTrack API.
 
 **Curent limitations and issues**
 
-- now unusable (I mean it)
-- clicks and underruns a lot (should be the ways to repair)
-- crashes on thread recreating (bug)
 - only one DynamicSound object at a time
-  (and this could be an insuperable hindrance, AudioTrack API is rather slow)
+  (don't sure if an issue, AudioTrack API is rather slow)
+- listener is called from separate thread, writing a thread safe code could be tricky
 - android only ;) 
-  because we really should work out the unified generative sound api, 
-  and I suppose flash is not a best model
+  flash is rather an inconsistent model for unified generative sound api
+- example application doesn't implement fade out to zero volume on note release, so it has clicks
+  and sounds unconvincing.
+  
 
 **Usage**
 
@@ -25,8 +27,8 @@ Reference the extension in your .nmml:
 
 Add imports:
 
-    import nme.media.DynamicSound;
-    import nme.media.DynamicSoundDataEvent;
+    import com.github.scythianfuego.DynamicSound;
+    import com.github.scythianfuego.DynamicSoundDataEvent;
 
 Create a new DynamicSound object:
 
@@ -57,12 +59,24 @@ is too slow to use original SampleDataEvent:
     }
     s.listen(listener);  
 
+Note that the listener will be called from a separate thread, so you will have to use synchronization
+primitives, *mutex for example (have a look at http://haxe.org/api/cpp/vm/thread API) to pass data
+between render thread and sound generator thread.
+The listener should process a chunk of data faster than playback consumes it, underruns 
+(and rather possibly crashes) could be expected otherwise.
+	
 Control playback:
 
     s.play();
     s.stop();
 
+The *stop() function makes sound threads wait in thread lock instead of stopping them.
+If you want to stop API completely, release threads and resources using
 
+    s.shutdown();	
+
+Note that DynamicSound object is not valid after this action, you'll have to recreate it to use again.
+	
 **Running the test application**
 
     build.bat on Windows
@@ -71,7 +85,7 @@ or
 
     cd Project
     haxelib run nme test soundupdate.nmml android
-
+	
 **Recompiling the extension**
 
     cd Extension\project

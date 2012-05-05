@@ -5,9 +5,9 @@
  * 
  */
 
-package nme.media;
+package com.github.scythianfuego;
 
-#if (cpp || neko)
+#if android
 
 class DynamicSoundDataEvent
 {

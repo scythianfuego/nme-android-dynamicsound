@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project>
 	
-	<app title="Extension Test" file="ExtensionTest" main="org.haxenme.extensiontest.ExtensionTest" package="org.haxenme.extensiontest" version="1.0.0" icon="Assets/nme.svg" company="Joshua Granick" />
+	<app title="DynamicSound Test" file="DynamicSound Test" main="com.github.scythianfuego.DynamicSoundTest" package="com.github.scythianfuego" version="1.0.0" icon="Assets/nme.svg" company="Joshua Granick" />
 	
 	<window width="640" height="480" fps="30" orientation="portrait" resizable="true" />
  	
