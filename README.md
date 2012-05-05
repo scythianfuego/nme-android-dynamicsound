@@ -60,7 +60,7 @@ is too slow to use original SampleDataEvent:
     s.listen(listener);  
 
 Note that the listener will be called from a separate thread, so you will have to use synchronization
-primitives, *mutex for example (have a look at http://haxe.org/api/cpp/vm/thread API) to pass data
+primitives, *mutex* for example (have a look at http://haxe.org/api/cpp/vm/thread API) to pass data
 between render thread and sound generator thread.
 The listener should process a chunk of data faster than playback consumes it, underruns 
 (and rather possibly crashes) could be expected otherwise.
@@ -70,7 +70,7 @@ Control playback:
     s.play();
     s.stop();
 
-The *stop() function makes sound threads wait in thread lock instead of stopping them.
+The *stop()* function makes sound threads wait in thread lock instead of stopping them.
 If you want to stop API completely, release threads and resources using
 
     s.shutdown();	
