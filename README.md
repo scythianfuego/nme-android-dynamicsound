@@ -8,7 +8,7 @@ Current version: 0.1.0
 This native extension for haxe NME implements generative audio 
 for android target by wrapping AudioTrack API.
 
-**Curent limitations and issues**
+**Curent limitations**
 
 - only one DynamicSound object at a time
   (don't sure if an issue, AudioTrack API is rather slow)
@@ -17,7 +17,12 @@ for android target by wrapping AudioTrack API.
   flash is rather an inconsistent model for unified generative sound api
 - example application doesn't implement fade out to zero volume on note release, so it has clicks
   and sounds unconvincing.
-  
+
+**Known issues**
+
+- synchronization error with following thread crash on slow devices and/or low buffer sizes
+  (typical for Acer Liquid)
+  possibly API should have ability to change sample rate or auto-downsample
 
 **Usage**
 
